@@ -6,5 +6,5 @@ readInt (x:xs)
 
 main = do
     input <- readFile "./Input.txt"
-    let answer = sum $ map readInt $ lines input
+    let answer = (sum . map readInt . lines) input
     print answer
