@@ -4,25 +4,26 @@ readInt :: String -> Int
 readInt (x : xs) | x == '+' = read xs
                  | x == '-' = read ('-' : xs)
 
-findFirstFreqRepeat :: [Int] -> Int
-findFirstFreqRepeat xs = findFirstFreqRepeat' xs (Set.empty, 0, Nothing)
-
-findFirstFreqRepeat' :: [Int] -> (Set.Set Int, Int, Maybe Int) -> Int
-findFirstFreqRepeat' xs (set, freq, Just x) = x
-findFirstFreqRepeat' xs (set, freq, Nothing) =
-    let result = foldl processFreq (set, freq, Nothing) xs
-    in  findFirstFreqRepeat' xs result
-
-processFreq
+findFirstRepeat
     :: (Set.Set Int, Int, Maybe Int) -> Int -> (Set.Set Int, Int, Maybe Int)
-processFreq (set, freq, Just x ) y = (set, freq, Just x)
-processFreq (set, freq, Nothing) x = if Set.member newFreq set
-    then (set, freq, Just newFreq)
-    else (Set.insert newFreq set, newFreq, Nothing)
-    where newFreq = freq + x
+findFirstRepeat (s, freq, _) i = if Set.member newFreq s
+          then (Set.empty, 0, Just newFreq)
+          else (Set.insert newFreq s, newFreq, Nothing)
+    where newFreq = freq + i
+
+haveNotFoundRepeat :: (Set.Set Int, Int, Maybe Int) -> Bool
+haveNotFoundRepeat (_, _, Nothing) = True
+haveNotFoundRepeat _               = False
 
 main = do
     input <- readFile "./Input.txt"
-    let answer = findFirstFreqRepeat . map readInt . lines $ input
+    let (_, _, Just answer) =
+            head
+                . dropWhile haveNotFoundRepeat
+                . scanl findFirstRepeat (Set.empty, 0, Nothing)
+                . cycle
+                . map readInt
+                . lines
+                $ input
     print answer
 
