@@ -1,14 +1,12 @@
 import qualified Data.Map                      as Map
-import qualified Data.Bifunctor                as Bifunctor
 
-incrementKey :: Ord a => a -> Map.Map a Int -> Map.Map a Int
-incrementKey k m = if Map.member k m
-   then Map.insert k ((m Map.! k) + 1) m
-   else Map.insert k 1 m
+incrementKey :: Ord a => Map.Map a Int -> a -> Map.Map a Int
+incrementKey m k = if Map.member k m
+    then Map.insert k ((m Map.! k) + 1) m
+    else Map.insert k 1 m
 
 hasNRepeats :: Int -> String -> Bool
-hasNRepeats n =
-    elem n . Map.elems . foldl (\m x -> incrementKey x m) Map.empty
+hasNRepeats n = elem n . Map.elems . foldl incrementKey Map.empty
 
 produceCounts :: String -> (Int, Int)
 produceCounts s = (mapToInt hasTwo, mapToInt hasThree)
@@ -19,15 +17,17 @@ produceCounts s = (mapToInt hasTwo, mapToInt hasThree)
 mapToInt :: Bool -> Int
 mapToInt x = if x then 1 else 0
 
+addTuples :: Num a => (a, a) -> (a, a) -> (a, a)
+addTuples (x, y) (a, b) = (x + a, y + b)
+
 sumTuples :: [(Int, Int)] -> (Int, Int)
-sumTuples = foldl (\(x, y) (a, b) -> (x + a, y + b)) (0, 0)
+sumTuples = foldl addTuples (0, 0)
+
+multiplyTupleValues :: Num a => (a, a) -> a
+multiplyTupleValues (a, b) = a * b
 
 checksum :: String -> Int
-checksum =
-    (\(x, y) -> x * y)
-        . sumTuples
-        . map produceCounts
-        . lines
+checksum = multiplyTupleValues . sumTuples . map produceCounts . lines
 
 main = do
     input <- readFile "./Input.txt"
